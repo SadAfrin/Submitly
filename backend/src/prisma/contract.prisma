@@ -1,0 +1,43 @@
+// use prisma-8
+
+enum Role {
+  @@type("pg/text@1")
+  STUDENT = "STUDENT"
+  MENTOR  = "MENTOR"
+}
+
+enum Status {
+  @@type("pg/text@1")
+  PENDING  = "PENDING"
+  APPROVED = "APPROVED"
+  REJECTED = "REJECTED"
+}
+
+model User {
+  id          Int               @id @default(autoincrement())
+  name        String
+  email       String            @unique
+  password    String
+  role        Role              @default(STUDENT)
+  submissions Submission[]
+  createdAt   TimestamptzString @default(now())
+  updatedAt   temporal.updatedAtString()
+}
+
+model Submission {
+  id              Int               @id @default(autoincrement())
+  projectName     String
+  frontendRepoUrl String?           @unique
+  backendRepoUrl  String?           @unique
+  frontendLiveUrl String?
+  backendLiveUrl  String?
+  description     String
+  status          Status            @default(PENDING)
+  userId          Int
+  user            User              @relation(fields: [userId], references: [id])
+  createdAt       TimestamptzString @default(now())
+  updatedAt       temporal.updatedAtString()
+
+  @@index([status])
+  @@index([userId])
+}
